@@ -64,6 +64,46 @@ public class CucumberSteps
                 .toContainExactly(expectedResponse);
     }
 
+    @Given("the web session {mySession} expects the most recent 3 echo responses to be:")
+    public void theWebSessionSessionExpectsTheMostRecentEchoResponsesToBe(final MyGatewaySessionDriver session, final DataTable expectedResponse) {
+        final EchoServiceProxy echoServiceProxy = session.services().getEchoServiceProxy();
+        UniqueId correlationId = echoServiceProxy.allocateCorrelationId();
+        echoServiceProxy.last3Messages(correlationId);
+
+        final ClientToMyGatewayChannel services = session.services();
+
+        expector.expect(services.getEchoServiceClientRecorder().last3MessagesResponse())
+                .withCorrelationId(correlationId)
+                .toHaveCompleted()
+                .to()
+                .contain()
+                .exactly()
+                .inOrder()
+                .elementsThatMatchRowsIn(expectedResponse);
+
+    }
+
+    @When("the web session {mySession} sends an echo request {uniqueId}: {string}")
+    public void theWebSessionSessionSendsAnEchoRequestRequestA(final MyGatewaySessionDriver session, final UniqueId correlationId, final String message) {
+        final EchoServiceProxy echoServiceProxy = session.services().getEchoServiceProxy();
+        try (final MutableEchoRequest request = echoServiceProxy.acquireEchoRequest())
+        {
+            request.message(message);
+            echoServiceProxy.echo(correlationId, request);
+        }
+    }
+
+    @And("the web session {mySession} gets echo response for {uniqueId}: {string}")
+    public void theWebSessionSessionGetsEchoResponseForRequestA(final MyGatewaySessionDriver session, final UniqueId correlationId, final String message) {
+        final ClientToMyGatewayChannel services = session.services();
+
+        expector.expect(services.getEchoServiceClientRecorder().echoResponse())
+                .withCorrelationId(correlationId)
+                .toHaveCompleted()
+                .and()
+                .toBeASingle("expect echo response", response -> Truth.assertThat(response.message()).isEqualTo(message));
+    }
+
     @When("the {componentNames} component is started")
     @When("the {componentNames} components are started")
     @Given("a running {componentNames}")

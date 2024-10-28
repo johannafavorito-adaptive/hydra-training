@@ -37,9 +37,24 @@ public class MyEchoService implements EchoService {
             int nextId = repository.count();
             EchoRecordCodec lastMessage = repository.get(nextId);
             response.response().message(lastMessage.message());
-            // look into flyweight to store last correlation id
             clientProxy.onLastMessageResponse(correlationId, response);
         }
+    }
+
+    @Override
+    public void last3Messages(UniqueId correlationId) {
+        int count = repository.count();
+        for (int j = Math.max(count - 2, 1); j <= count; j++) {
+            try (final MutableEchoResponse response = clientProxy.acquireEchoResponse()) {
+                response.message(repository.get(j).message());
+                clientProxy.onLast3MessagesResponse(correlationId, response);
+            }
+        }
+        clientProxy.onLast3MessagesResponseCompleted(correlationId);
+    }
+
+    @Override
+    public void cancelLast3Messages(UniqueId correlationId) {
     }
 
 }

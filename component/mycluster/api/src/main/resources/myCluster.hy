@@ -22,6 +22,9 @@ service EchoService = {
 
     @AccessControl(permission: 0)
     lastMessage(): LastMessage
+
+    @AccessControl(permission: 0)
+    last3Messages(): EchoResponse stream
 }
 
 cluster MyCluster = {

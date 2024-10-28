@@ -35,3 +35,51 @@ Feature: Echo
     Then my session foo expects the most recent echo response to be:
       | Type      | Message |
       | Response  | World   |
+
+  Scenario: Returns latest 3 Echo messages
+  # There shouldn't be any messages yet
+    Given the web session Session1 expects the most recent 3 echo responses to be:
+      | Message |
+
+    When the web session Session1 sends an echo request RequestA: "Hello"
+    And the web session Session1 gets echo response for RequestA: "Hello"
+
+    Then the web session Session1 expects the most recent 3 echo responses to be:
+      | Message |
+      | Hello   |
+
+    When the web session Session1 sends an echo request RequestB: "World"
+    And the web session Session1 gets echo response for RequestB: "World"
+
+    Then the web session Session1 expects the most recent 3 echo responses to be:
+      | Message |
+      | Hello   |
+      | World   |
+
+    When the web session Session1 sends an echo request RequestC: "Foo"
+    And the web session Session1 gets echo response for RequestC: "Foo"
+
+    Then the web session Session1 expects the most recent 3 echo responses to be:
+      | Message |
+      | Hello   |
+      | World   |
+      | Foo     |
+
+    When the web session Session1 sends an echo request RequestD: "Bar"
+    And the web session Session1 gets echo response for RequestD: "Bar"
+
+    Then the web session Session1 expects the most recent 3 echo responses to be:
+      | Message |
+      | World   |
+      | Foo     |
+      | Bar     |
+
+    When the web session Session1 sends an echo request RequestE: "Bar"
+    And the web session Session1 gets echo response for RequestE: "Bar"
+
+    Then the web session Session1 expects the most recent 3 echo responses to be:
+      | Message |
+      | Foo   |
+      | Bar     |
+      | Bar     |
+
