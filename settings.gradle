@@ -1,0 +1,6 @@
+rootProject.name = 'SampleHydraApp'
+include "component:mycluster:api"
+include "component:mygateway:api"
+include "component:mycluster:impl"
+include "component:mygateway:impl"
+include "test:acceptance"

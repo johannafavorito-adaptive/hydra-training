@@ -1,0 +1,42 @@
+plugins {
+    id 'java'
+    id 'groovy'
+    id 'groovy-gradle-plugin'
+    id 'java-gradle-plugin'
+}
+
+repositories {
+    gradlePluginPortal {
+        content {
+            excludeGroupByRegex "com\\.weareadaptive.*"
+        }
+    }
+}
+
+dependencies {
+    implementation group: 'com.github.spotbugs.snom', name: 'spotbugs-gradle-plugin', version: "${pluginVersionSpotBugs}"
+}
+
+gradlePlugin {
+    plugins {
+        create('configureJavaLibrary') {
+            id = 'local-plugin.configure-java-library'
+            implementationClass = 'com.weareadaptive.hydraplatform.gradle.plugins.ConfigureJavaLibraryPlugin'
+        }
+
+        create('configureCheckStyle') {
+            id = 'local-plugin.configure-checkstyle'
+            implementationClass = 'com.weareadaptive.hydraplatform.gradle.plugins.ConfigureCheckstylePlugin'
+        }
+
+        create('cucumber') {
+            id = 'local-plugin.cucumber'
+            implementationClass = 'com.weareadaptive.hydraplatform.gradle.plugins.CucumberPlugin'
+        }
+
+        create('dockerService') {
+            id = 'local-plugin.docker-service'
+            implementationClass = 'com.weareadaptive.hydraplatform.gradle.plugins.DockerServicePlugin'
+        }
+    }
+}

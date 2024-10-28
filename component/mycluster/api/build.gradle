@@ -1,0 +1,10 @@
+apply plugin: 'java'
+apply plugin: 'com.weareadaptive.hydra-code-gen-plugin'
+
+dependencies {
+    implementation "com.weareadaptive:hydra-platform-engine:${hydraVersion}"
+}
+
+codecs {
+    defaultGeneratorVersion = "v4"
+}

@@ -1,0 +1,53 @@
+import com.weareadaptive.hydraplatform.gradle.ArtifactoryCredentials
+
+defaultTasks 'build', 'cucumberEmbeddedDirect', 'cucumberEmbeddedReal'
+
+buildscript {
+    ext {
+        hydraVersion = '4.66.0'
+    }
+
+    ext.adaptiveRepositories = {
+        mavenLocal()
+        gradlePluginPortal {
+            content {
+                excludeGroupByRegex "com\\.weareadaptive.*"
+                excludeModule("io.aeron", "aeron-cluster-standby")
+            }
+        }
+        maven {
+            url 'https://weareadaptive.jfrog.io/artifactory/hydra-release/'
+            credentials {
+                def credentials = ArtifactoryCredentials.load(project)
+                username credentials.username
+                password credentials.password  // pragma: allowlist secret
+            }
+            content {
+                includeGroup "com.weareadaptive"
+                includeGroup "io.aeron"
+            }
+        }
+    }
+    repositories adaptiveRepositories
+    dependencies {
+        classpath "com.weareadaptive:hydra-code-gen-plugin:${hydraVersion}"
+    }
+}
+
+allprojects {
+    repositories adaptiveRepositories
+}
+
+group 'org.adaptive'
+version '1.0-SNAPSHOT'
+
+repositories adaptiveRepositories
+
+tasks.register('buildContainers', Task.class, { task ->
+    rootProject.subprojects { subProject ->
+        def jibTask = subProject.tasks.findByName('jibDockerBuild')
+        if (jibTask != null) {
+            dependsOn(jibTask)
+        }
+    }
+})

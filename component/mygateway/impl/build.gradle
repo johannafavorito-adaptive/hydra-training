@@ -1,0 +1,9 @@
+apply plugin: 'java'
+
+dependencies {
+    implementation "com.weareadaptive:hydra-platform-web:${hydraVersion}"
+    implementation "com.weareadaptive:hydra-ws-cluster-gateway:${hydraVersion}"
+    implementation "com.weareadaptive:hydra-logging-impl:${hydraVersion}"
+    implementation project(":component:mycluster:api")
+    implementation project(":component:mygateway:api")
+}
