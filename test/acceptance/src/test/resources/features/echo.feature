@@ -92,3 +92,19 @@ Feature: Echo
       | Message |
       | Hello   |
       | World   |
+
+  Scenario: Broadcasts messages to all clients
+    Given a connected web session 'Session1'
+    And a connected web session 'Session2'
+
+    When the web session Session1 sends a broadcast message "Hello"
+    And the web session Session2 sends a broadcast message "World"
+
+    Then Session1 expects to receive broadcast messages:
+      | Message |
+      | Hello   |
+      | World   |
+    And Session2 expects to receive broadcast messages:
+      | Message |
+      | Hello   |
+      | World   |

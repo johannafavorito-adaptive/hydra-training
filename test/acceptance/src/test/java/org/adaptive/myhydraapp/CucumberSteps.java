@@ -175,4 +175,29 @@ public class CucumberSteps
         return PropertyMatcher.copyTo(new AllocatedEchoRequest(), row);
     }
 
+    @Given("a connected web session {string}")
+    public void aConnectedWebSessionSession(final String message) {
+        mySession(message);
+    }
+
+    @When("the web session {mySession} sends a broadcast message {string}")
+    public void theWebSessionSessionSendsABroadcastMessage(final MyGatewaySessionDriver session, final String message) {
+        final EchoServiceProxy echoServiceProxy = session.services().getEchoServiceProxy();
+        UniqueId correlationId = echoServiceProxy.allocateCorrelationId();
+
+        try (final MutableEchoRequest request = echoServiceProxy.acquireEchoRequest())
+        {
+            request.message(message);
+            echoServiceProxy.broadcast(correlationId, request);
+        }
+    }
+
+    @Then("{mySession} expects to receive broadcast messages:")
+    public void sessionExpectsToReceiveBroadcastMessages(final MyGatewaySessionDriver session, final DataTable expectedResponses) {
+        final ClientToMyGatewayChannel services = session.services();
+
+        expector.expect(services.getEchoServiceClientRecorder().broadcastEvents())
+                .withoutAnyCorrelation()
+                .toContainExactly(expectedResponses);
+    }
 }

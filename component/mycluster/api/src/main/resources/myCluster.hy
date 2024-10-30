@@ -24,10 +24,15 @@ service EchoService = {
     lastMessage(): LastMessage
 
     @AccessControl(permission: 0)
-    last3Messages(): EchoResponse stream
+    last3Messages(): EchoResponse stream                    // requested stream
 
     @AccessControl(permission: 0)
-    echoStream(EchoRequest stream): EchoResponse stream
+    echoStream(EchoRequest stream): EchoResponse stream     // bi-directional
+
+    @AccessControl(permission: 0)
+    broadcast(EchoRequest)                                  // fire-and-forget
+
+    broadcastEvents: EchoResponse stream                    // broadcast
 }
 
 cluster MyCluster = {

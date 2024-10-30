@@ -4,10 +4,7 @@ import com.weareadaptive.hydra.platform.commontypes.entities.UniqueId;
 import com.weareadaptive.hydraplatform.errornotifications.entities.ErrorNotification;
 import org.adaptive.myhydraapp.mycluster.EchoRecordRepository;
 import org.adaptive.myhydraapp.mycluster.codecs.EchoRecordCodec;
-import org.adaptive.myhydraapp.mycluster.entities.EchoRequest;
-import org.adaptive.myhydraapp.mycluster.entities.MutableEchoRecord;
-import org.adaptive.myhydraapp.mycluster.entities.MutableEchoResponse;
-import org.adaptive.myhydraapp.mycluster.entities.MutableLastMessage;
+import org.adaptive.myhydraapp.mycluster.entities.*;
 import org.adaptive.myhydraapp.mycluster.services.EchoService;
 import org.adaptive.myhydraapp.mycluster.services.EchoServiceClientProxy;
 
@@ -78,6 +75,14 @@ public class MyEchoService implements EchoService {
     @Override
     public void cancelEchoStream(UniqueId correlationId) {
 
+    }
+
+    @Override
+    public void broadcast(UniqueId correlationId, EchoRequest echoRequest) {
+        try (final MutableEchoResponse response = clientProxy.acquireEchoResponse()) {
+            response.message(echoRequest.message());
+            clientProxy.onBroadcastEvents(response);
+        }
     }
 
 }
