@@ -83,3 +83,12 @@ Feature: Echo
       | Bar     |
       | Bar     |
 
+  Scenario: Returns All Echo Requests in a Stream
+    When the web session Session1 sends an echo stream RequestA:
+      | Message |
+      | Hello   |
+      | World   |
+    Then the web session Session1 gets echo response stream for RequestA:
+      | Message |
+      | Hello   |
+      | World   |

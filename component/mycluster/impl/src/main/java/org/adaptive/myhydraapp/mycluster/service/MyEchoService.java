@@ -1,6 +1,7 @@
 package org.adaptive.myhydraapp.mycluster.service;
 
 import com.weareadaptive.hydra.platform.commontypes.entities.UniqueId;
+import com.weareadaptive.hydraplatform.errornotifications.entities.ErrorNotification;
 import org.adaptive.myhydraapp.mycluster.EchoRecordRepository;
 import org.adaptive.myhydraapp.mycluster.codecs.EchoRecordCodec;
 import org.adaptive.myhydraapp.mycluster.entities.EchoRequest;
@@ -55,6 +56,28 @@ public class MyEchoService implements EchoService {
 
     @Override
     public void cancelLast3Messages(UniqueId correlationId) {
+    }
+
+    @Override
+    public void onEchoStream(UniqueId correlationId, EchoRequest echoRequest) {
+        try (MutableEchoResponse response = clientProxy.acquireEchoResponse()) {
+            response.message(echoRequest.message());
+            clientProxy.onEchoStreamResponse(correlationId, response);
+        }
+    }
+
+    @Override
+    public void onEchoStreamCompleted(UniqueId correlationId) {
+        clientProxy.onEchoStreamResponseCompleted(correlationId);
+    }
+
+    @Override
+    public void onEchoStreamError(UniqueId correlationId, ErrorNotification errorNotification) {
+    }
+
+    @Override
+    public void cancelEchoStream(UniqueId correlationId) {
+
     }
 
 }

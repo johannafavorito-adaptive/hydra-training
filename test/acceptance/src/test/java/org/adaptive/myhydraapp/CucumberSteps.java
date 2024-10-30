@@ -2,19 +2,27 @@ package org.adaptive.myhydraapp;
 
 import com.google.common.truth.Truth;
 import com.weareadaptive.hydra.cucumber.Expector;
+import com.weareadaptive.hydra.cucumber.PropertyMatcher;
 import com.weareadaptive.hydra.platform.commontypes.entities.UniqueId;
+import com.weareadaptive.hydra.platform.web.testing.WebSessionDriver;
 import io.cucumber.datatable.DataTable;
+import io.cucumber.java.DataTableType;
 import io.cucumber.java.ParameterType;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
+import org.adaptive.myhydraapp.mycluster.allocated.AllocatedEchoRequest;
+import org.adaptive.myhydraapp.mycluster.entities.EchoRequest;
+import org.adaptive.myhydraapp.mycluster.entities.EchoResponse;
 import org.adaptive.myhydraapp.mycluster.entities.MutableEchoRequest;
 import org.adaptive.myhydraapp.mycluster.services.EchoServiceProxy;
 import org.adaptive.myhydraapp.mygateway.components.ClientToMyGatewayChannel;
 import org.adaptive.myhydraapp.mygateway.components.MyGatewaySessionDriver;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CucumberSteps
 {
@@ -104,6 +112,24 @@ public class CucumberSteps
                 .toBeASingle("expect echo response", response -> Truth.assertThat(response.message()).isEqualTo(message));
     }
 
+    @When("the web session {mySession} sends an echo stream {uniqueId}:")
+    public void theWebSessionSessionSendsAnEchoStreamRequestA(final MyGatewaySessionDriver session, final UniqueId correlationId, final List<EchoRequest> requests) {
+        final EchoServiceProxy echoServiceProxy = session.services().getEchoServiceProxy();
+        requests.forEach(request -> echoServiceProxy.onEchoStream(correlationId, request));
+    }
+
+    @Then("the web session {mySession} gets echo response stream for {uniqueId}:")
+    public void theWebSessionSessionGetsEchoResponseStreamForRequestA(final MyGatewaySessionDriver session, final UniqueId correlationId, final DataTable responses) {
+        final ClientToMyGatewayChannel services = session.services();
+        services.getEchoServiceProxy().onEchoStreamCompleted(correlationId);
+
+        expector.expect(services.getEchoServiceClientRecorder().echoStreamResponse())
+                .withCorrelationId(correlationId)
+                .toHaveCompleted()
+                .and()
+                .toContainExactly(responses);
+    }
+
     @When("the {componentNames} component is started")
     @When("the {componentNames} components are started")
     @Given("a running {componentNames}")
@@ -142,6 +168,11 @@ public class CucumberSteps
             session.connect();
         }
         return session;
+    }
+
+    @DataTableType
+    public EchoRequest message(final Map<String, String> row) {
+        return PropertyMatcher.copyTo(new AllocatedEchoRequest(), row);
     }
 
 }
