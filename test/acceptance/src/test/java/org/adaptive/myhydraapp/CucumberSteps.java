@@ -4,7 +4,6 @@ import com.google.common.truth.Truth;
 import com.weareadaptive.hydra.cucumber.Expector;
 import com.weareadaptive.hydra.cucumber.PropertyMatcher;
 import com.weareadaptive.hydra.platform.commontypes.entities.UniqueId;
-import com.weareadaptive.hydra.platform.web.testing.WebSessionDriver;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.DataTableType;
 import io.cucumber.java.ParameterType;
@@ -14,13 +13,11 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.adaptive.myhydraapp.mycluster.allocated.AllocatedEchoRequest;
 import org.adaptive.myhydraapp.mycluster.entities.EchoRequest;
-import org.adaptive.myhydraapp.mycluster.entities.EchoResponse;
 import org.adaptive.myhydraapp.mycluster.entities.MutableEchoRequest;
 import org.adaptive.myhydraapp.mycluster.services.EchoServiceProxy;
 import org.adaptive.myhydraapp.mygateway.components.ClientToMyGatewayChannel;
 import org.adaptive.myhydraapp.mygateway.components.MyGatewaySessionDriver;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -200,4 +197,5 @@ public class CucumberSteps
                 .withoutAnyCorrelation()
                 .toContainExactly(expectedResponses);
     }
+
 }

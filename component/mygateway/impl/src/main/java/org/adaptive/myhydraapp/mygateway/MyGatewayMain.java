@@ -6,6 +6,7 @@ import com.weareadaptive.hydra.platform.config.Configurer;
 import com.weareadaptive.hydra.platform.web.bindings.WebBinding;
 import org.adaptive.myhydraapp.mygateway.components.MyGateway;
 import org.adaptive.myhydraapp.mygateway.components.MyGatewayBootstrapper;
+import org.adaptive.myhydraapp.mygateway.service.CorrelationServiceImpl;
 
 public class MyGatewayMain
 {
@@ -13,6 +14,9 @@ public class MyGatewayMain
     {
         context.channelToWebSockets().registerEchoService(context.channelToCluster().getEchoServiceProxy());
         context.channelToCluster().registerEchoServiceClient(context.channelToWebSockets().getEchoServiceClientProxy());
+
+        final CorrelationServiceImpl correlationService = new CorrelationServiceImpl(context.channelToWebSockets().getCorrelationServiceClientProxy());
+        context.channelToWebSockets().registerCorrelationService(correlationService);
     };
 
     public static void main(String[] args) {
