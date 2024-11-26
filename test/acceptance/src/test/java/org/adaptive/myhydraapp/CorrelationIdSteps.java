@@ -26,12 +26,26 @@ public class CorrelationIdSteps {
 
     @Then("the web session {mySession} gets correlationEcho response for {uniqueId}")
     public void theWebSessionSessionGetsCorrelationEchoResponseForRequestA(final MyGatewaySessionDriver session, final UniqueId correlationId) {
+//        final ClientToMyGatewayChannel services = session.services();
+//
+//        expector.expect(services.getCorrelationServiceClientRecorder().correlationEchoResponse())
+//                .withCorrelationId(correlationId)
+//                .toHaveCompleted()
+//                .and()
+//                .toBeASingle("expect correlationId", response -> Truth.assertThat(response.correlationId()).isEqualTo(correlationId));
+    }
+
+    @Then("the web session {mySession} expects the last correlation ID to be from {uniqueId}")
+    public void theWebSessionSessionExpectsTheLastCorrelationIDToBeFromRequestA(final MyGatewaySessionDriver session, final UniqueId correlationId) {
+        final CorrelationServiceProxy correlationServiceProxy = session.services().getCorrelationServiceProxy();
+        correlationServiceProxy.lastCorrelationEcho(correlationId);
+
         final ClientToMyGatewayChannel services = session.services();
 
-        expector.expect(services.getCorrelationServiceClientRecorder().correlationEchoResponse())
+        expector.expect(services.getCorrelationServiceClientRecorder().lastCorrelationEchoResponse())
                 .withCorrelationId(correlationId)
                 .toHaveCompleted()
                 .and()
-                .toBeASingle("expect correlationId", response -> Truth.assertThat(response.correlationId()).isEqualTo(correlationId));
+                .toBeASingle("expect correlationId", response -> Truth.assertThat(response.asLastCorrelationId().correlationId()).isEqualTo(correlationId));
     }
 }

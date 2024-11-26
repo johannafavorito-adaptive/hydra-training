@@ -10,9 +10,16 @@ type CorrelationIdResponse = {
     correlationId: UniqueId
 }
 
+type LastCorrelationIdResponse =
+    | NoCorrelationId
+    | LastCorrelationId of CorrelationIdResponse
+
 service CorrelationService = {
     @AccessControl(permission: 0)
     correlationEcho(): CorrelationIdResponse
+
+    @AccessControl(permission: 0)
+    lastCorrelationEcho(): LastCorrelationIdResponse
 }
 
 web-gateway MyGateway = {
@@ -22,5 +29,3 @@ web-gateway MyGateway = {
         CorrelationService
     }
 }
-
-
