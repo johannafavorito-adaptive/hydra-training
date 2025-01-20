@@ -1,0 +1,85 @@
+x-config:
+  cluster-addresses: &cluster-addresses
+    CLUSTER_ADDRESSES: ${CLUSTER_ADDRESSES:-173.18.202.2,173.18.202.3,173.18.202.4}
+  engine-env: &engine-env
+    <<: *cluster-addresses
+    HYDRA_CLUSTER_MODE: "TEST"
+    RUNTIME_PARAMS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001
+
+
+  health-check: &health-check
+    healthcheck:
+      test: [ "CMD-SHELL", "curl -fs http://localhost:8000/healthy || exit 1" ]
+      interval: 1s
+      timeout: 5s
+      retries: 1
+      start_period: 10s
+
+services:
+  my-cluster:
+    image: "${PLATFORM_REGISTRY}my-cluster-box:latest"
+    hostname: my-cluster
+    shm_size: '1gb'
+    networks:
+      internal_bus:
+        ipv4_address: 173.18.202.2
+#    platform: linux/arm64/v8
+    restart: unless-stopped
+    <<: *health-check
+    environment:
+      <<: *engine-env
+
+  my-cluster-1:
+    image: "${PLATFORM_REGISTRY}my-cluster-box:latest"
+    hostname: my-cluster-1
+    shm_size: '1gb'
+    networks:
+      internal_bus:
+        ipv4_address: 173.18.202.3
+    restart: unless-stopped
+    <<: *health-check
+    environment:
+      <<: *engine-env
+
+  my-cluster-2:
+    image: "${PLATFORM_REGISTRY}my-cluster-box:latest"
+    hostname: my-cluster-2
+    shm_size: '1gb'
+    networks:
+      internal_bus:
+        ipv4_address: 173.18.202.4
+    restart: unless-stopped
+    <<: *health-check
+    environment:
+      <<: *engine-env
+
+  my-gateway:
+    image: "${PLATFORM_REGISTRY}my-gateway-box:latest"
+    depends_on:
+      - my-cluster
+      - my-cluster-1
+      - my-cluster-2
+    hostname: my-gateway
+    shm_size: '1gb'
+    ports:
+      - "8929:8929"
+    networks:
+      internal_bus:
+        ipv4_address: 173.18.202.10
+    restart: unless-stopped
+    <<: *health-check
+    environment:
+      <<: *cluster-addresses
+      RUNTIME_PARAMS: -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5001 ${COMMON_RUNTIME_PARAMS}
+
+networks:
+  internal_bus:
+    driver: bridge
+    driver_opts:
+      com.docker.network.bridge.enable_icc: 'true'
+      com.docker.network.driver.mtu: 9000
+      com.docker.network.enable_ipv6: 'false'
+    ipam:
+      driver: default
+      config:
+        - subnet: "173.18.202.0/24"

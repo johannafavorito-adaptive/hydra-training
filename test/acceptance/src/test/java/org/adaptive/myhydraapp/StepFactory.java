@@ -16,6 +16,9 @@ public class StepFactory extends HydraPlatformStepFactory
             case EMBEDDED_REAL:
                 addClass(EmbeddedRealDeployment.class);
                 break;
+            case EXISTING:
+                addClass(ExistingDeployment.class);
+                break;
         }
     }
 

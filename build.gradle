@@ -1,6 +1,5 @@
 import com.weareadaptive.hydraplatform.gradle.ArtifactoryCredentials
-
-defaultTasks 'build', 'cucumberEmbeddedDirect', 'cucumberEmbeddedReal'
+import com.weareadaptive.hydraplatform.gradle.plugins.DockerServicePlugin
 
 buildscript {
     ext {
@@ -34,20 +33,31 @@ buildscript {
     }
 }
 
+plugins {
+    id 'com.google.cloud.tools.jib' apply false
+}
+
 allprojects {
     repositories adaptiveRepositories
 }
+
+ext {
+    // Please include the trailing slash
+    dockerTargetRegistry = System.getenv().containsKey('PLATFORM_REGISTRY') ? System.getenv('PLATFORM_REGISTRY') : 'weareadaptive-hydra-docker-snapshot.jfrog.io/'
+    // Override with -PdockerTag=...
+    dockerTag = project.properties['dockerTag'] ?: 'latest'
+    docker_cluster_addresses = "173.18.202.2"
+    docker_services = [
+            'my-cluster',
+            'my-gateway'
+    ] as Set
+}
+
+defaultTasks 'build', 'cucumberEmbeddedDirect', 'cucumberEmbeddedReal'
 
 group 'org.adaptive'
 version '1.0-SNAPSHOT'
 
 repositories adaptiveRepositories
 
-tasks.register('buildContainers', Task.class, { task ->
-    rootProject.subprojects { subProject ->
-        def jibTask = subProject.tasks.findByName('jibDockerBuild')
-        if (jibTask != null) {
-            dependsOn(jibTask)
-        }
-    }
-})
+apply plugin: DockerServicePlugin
