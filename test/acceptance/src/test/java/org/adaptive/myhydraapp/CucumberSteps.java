@@ -173,8 +173,8 @@ public class CucumberSteps
     }
 
     @Given("a connected web session {string}")
-    public void aConnectedWebSessionSession(final String message) {
-        mySession(message);
+    public void aConnectedWebSessionSession(final String sessionName) {
+        mySession(sessionName);
     }
 
     @When("the web session {mySession} sends a broadcast message {string}")
@@ -190,12 +190,35 @@ public class CucumberSteps
     }
 
     @Then("{mySession} expects to receive broadcast messages:")
-    public void sessionExpectsToReceiveBroadcastMessages(final MyGatewaySessionDriver session, final DataTable expectedResponses) {
+    public void sessionExpectsToReceiveBroadcastMessages(final MyGatewaySessionDriver session, final DataTable expectedResponse) {
         final ClientToMyGatewayChannel services = session.services();
 
         expector.expect(services.getEchoServiceClientRecorder().broadcastEvents())
                 .withoutAnyCorrelation()
-                .toContainExactly(expectedResponses);
+                .toContainExactly(expectedResponse);
     }
 
+    @When("the web session {mySession} subscribes to Echo messages with {uniqueId}")
+    public void theWebSessionSessionSubscribesToEchoMessagesWithRequestA(final MyGatewaySessionDriver session, final UniqueId correlationId) {
+        final ClientToMyGatewayChannel services = session.services();
+
+        services.getEchoSubscriptionServiceProxy().subscribe(correlationId);
+    }
+
+    @Then("{mySession} expects to receive messages from subscription {uniqueId}:")
+    public void sessionExpectsToReceiveMessagesFromSubscriptionRequestA(final MyGatewaySessionDriver session, final UniqueId correlationId, final DataTable expectedResponse) {
+        final ClientToMyGatewayChannel services = session.services();
+
+        expector.expect(services.getEchoSubscriptionServiceClientRecorder().subscribeResponse())
+                .withCorrelationId(correlationId)
+                .toHaveNotTerminated()
+                .toContainExactly(expectedResponse);
+    }
+
+    @When("the web session {mySession} unsubscribes to Echo messages from {uniqueId}")
+    public void theWebSessionSessionUnsubscribesToEchoMessagesFromRequestA(final MyGatewaySessionDriver session, final UniqueId correlationId) {
+        final ClientToMyGatewayChannel services = session.services();
+
+        services.getEchoSubscriptionServiceProxy().cancelSubscribe(correlationId);
+    }
 }

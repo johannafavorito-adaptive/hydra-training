@@ -108,3 +108,30 @@ Feature: Echo
       | Message |
       | Hello   |
       | World   |
+
+  Scenario: Sends messages to subscribed sessions
+    Given a connected web session 'Session1'
+    And a connected web session 'Session2'
+    And a connected web session 'Session3'
+
+    And the web session Session1 sends a broadcast message "Message A"
+    And Session1 expects to receive broadcast messages:
+      | Message   |
+      | Message A |
+
+    When the web session Session3 subscribes to Echo messages with RequestA
+    And the web session Session1 sends a broadcast message "Message B"
+    And the web session Session2 sends a broadcast message "Message C"
+
+    Then Session3 expects to receive messages from subscription RequestA:
+      | Message   |
+      | Message B |
+      | Message C |
+
+    When the web session Session3 unsubscribes to Echo messages from RequestA
+    And the web session Session1 sends a broadcast message "Message D"
+
+    Then Session3 expects to receive messages from subscription RequestA:
+      | Message   |
+      | Message B |
+      | Message C |
