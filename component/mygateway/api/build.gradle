@@ -1,5 +1,8 @@
+import com.weareadaptive.hydraplatform.gradle.HydraContainerUtils
+
 apply plugin: 'java'
 apply plugin: 'com.weareadaptive.hydra-code-gen-plugin'
+apply plugin: 'com.google.cloud.tools.jib'
 
 dependencies {
     implementation "com.weareadaptive:hydra-platform-engine:${hydraVersion}"
@@ -8,4 +11,32 @@ dependencies {
 
 codecs {
     defaultGeneratorVersion = "v4"
+}
+
+jib {
+    from {
+        image = HydraContainerUtils.imageName("hydra-client", project)
+    }
+    to {
+        def registry = project.properties['dockerTargetRegistry']
+        def tag = project.properties['dockerTag']
+        image = "${registry}my-gateway-box:${tag}"
+    }
+    container {
+        // Dependency JARs will go to /hydra/libs
+        // Classes will be dropped into /hydra/classes/<blah>
+        appRoot = '/hydra'
+        entrypoint = 'INHERIT'
+        environment = [
+                'CLASS_PATH'               : '/hydra/classes:/hydra/lib:/hydra/resources:/hydra/libs/*',
+                'MAIN_CLASS'               : 'org.adaptive.myhydraapp.mygateway.MyGatewayMain',
+                'CLASS_PATH_AUTOEXPAND'    : 'false',
+                'ENABLE_GC_LOGGING'        : 'true'
+        ]
+        ports = [
+                '8929'
+        ]
+        user = 'hydra:users'
+        creationTime = 'USE_CURRENT_TIMESTAMP'
+    }
 }
