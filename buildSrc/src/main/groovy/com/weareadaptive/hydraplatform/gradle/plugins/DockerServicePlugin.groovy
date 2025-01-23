@@ -57,7 +57,7 @@ class DockerServicePlugin implements Plugin<Project> {
                 def services = project.rootProject.ext.docker_services ? project.rootProject.ext.docker_services : []
                 return ["up", "-d"] + services
             }
-            dependsOn = [':docker:buildContainers']
+//            dependsOn = [':docker:buildContainers']
         })
 
         project.tasks.register('stopServices', DockerServiceTask.class, { task ->
